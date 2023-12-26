@@ -1,6 +1,4 @@
--------------------------------
-| (0) Close                   |
-| (1) List setups             |
-| (2) Delete old setups       |
-| (3) Delete empty subfolders |
--------------------------------
+### Features
+- List all setups
+- Delete old setups
+- Delete empty subfolders
