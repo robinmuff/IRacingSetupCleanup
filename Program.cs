@@ -1,43 +1,51 @@
-﻿using System;
-using System.IO;
-using System.Linq;
+﻿using System.Runtime.CompilerServices;
+using IRacingSetupCleanup;
 
 class Program
 {
+    const ConsoleColor SELECTED_COLOR = ConsoleColor.Green;
+    static readonly List<string> OPTIONS =
+    [
+        "List setups",
+        "Delete old setups",
+        "Delete empty subfolders"
+    ];
     static readonly string folderPath = @$"C:\Users\{Environment.UserName}\Documents\iRacing\setups\";
 
     static void Main(string[] args)
     {
         string consoleInput = "";
 
-        while (consoleInput != "0")
+        while (consoleInput != "x")
         {
-            Console.WriteLine("-------------------------------");
-            Console.WriteLine("| (0) Close                   |");
-            Console.WriteLine("| (1) List setups             |");
-            Console.WriteLine("| (2) Delete old setups       |");
-            Console.WriteLine("| (3) Delete empty subfolders |");
-            Console.WriteLine("-------------------------------");
+            ShowMenu();
+
             consoleInput = Console.ReadLine() ?? "";
+
+            if (!IsInputValid(consoleInput)) { Console.WriteLine("Invalid Input"); CreateMenuDistance(); continue; }
+
+            RemoveLastMenu();
+
+            ShowMenu(Convert.ToInt16(consoleInput));
 
             switch (consoleInput)
             {
-                case "1":
+                case "0":
                     ListSetups();
                     break;
-                case "2":
+                case "1":
                     DeleteSetups();
                     break;
-                case "3":
+                case "2":
                     DeleteEmptySubfolders();
                     break;
-                default:
-                    Console.WriteLine("Invalid input. Please try again.");
-                    break;
             }
+
+            CreateMenuDistance();
         }
     }
 
+    // -> Features
     static void ListSetups()
     {
         var setupFiles = Directory
@@ -50,7 +58,6 @@ class Program
         Console.WriteLine("--- LIST OF SETUPS ---");
         foreach (var setup in setupFiles) setup.ConsoleWriteLine(spaceOfNameText);
     }
-
     static void DeleteSetups()
     {
         Console.Write("Enter the current season (e.g., 24S1): ");
@@ -85,8 +92,7 @@ class Program
             Console.WriteLine("Deletion canceled.");
         }
     }
-
-     static void DeleteEmptySubfolders()
+    static void DeleteEmptySubfolders()
     {
         List<string> subfoldersToDelete = [];
 
@@ -137,15 +143,52 @@ class Program
         }
     }
 
-    class Setup(string carName, string setupName)
+    // -> Helper
+    // Menu
+    static bool IsInputValid(string input)
     {
-        public string CarName { get; } = carName;
-        public string SetupName { get; } = setupName;
-
-        public void ConsoleWriteLine(int space) 
+        return int.TryParse(input, out int result) && (result >=0 || result < OPTIONS.Count);
+    }
+    static void RemoveLastMenu()
+    {
+        // Remove the menu + (header + footer + current = 3)
+        for (int i = 0; i < OPTIONS.Count + 3; i++)
         {
-            string formattedCarName = CarName.Length >= space ? CarName : CarName.PadRight(space);
-            Console.WriteLine($"{formattedCarName} -> {SetupName}");
+            Console.SetCursorPosition(0, Console.CursorTop - 1); // Move cursor up one line
+            ClearCurrentConsoleLine(); // Clear the line
         }
+    }
+    static void ShowMenu(int selected = -1)
+    {
+        int longestOption = OPTIONS.Max(item => item.Length);
+
+        // Longest text + distance for left and right design (8)
+        string menuOutline = new('-', longestOption + 8);
+
+        Console.WriteLine(menuOutline);
+        foreach (string option in OPTIONS)
+        {
+            bool isSelected = OPTIONS.IndexOf(option) == selected;
+
+            Console.Write("| ");
+
+            if (isSelected) Console.ForegroundColor = SELECTED_COLOR;
+            Console.Write($"({OPTIONS.IndexOf(option)}) {option.PadRight(longestOption)}");
+            if (isSelected) Console.ForegroundColor = ConsoleColor.White;
+
+            Console.WriteLine(" |");
+        }
+        Console.WriteLine(menuOutline);
+    }
+    static void ClearCurrentConsoleLine()
+    {
+        int currentLineCursor = Console.CursorTop;
+        Console.SetCursorPosition(0, Console.CursorTop);
+        Console.Write(new string(' ', Console.WindowWidth));
+        Console.SetCursorPosition(0, currentLineCursor);
+    }
+    static void CreateMenuDistance() 
+    {
+        Console.WriteLine(); Console.WriteLine(); Console.WriteLine();
     }
 }
