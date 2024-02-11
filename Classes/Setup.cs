@@ -1,4 +1,4 @@
-namespace IRacingSetupCleanup
+namespace IRacingSetupCleanup.Classes
 {
     public class Setup(string carName, string setupName)
     {

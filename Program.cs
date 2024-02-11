@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using IRacingSetupCleanup;
+﻿using IRacingSetupCleanup.Classes;
 
 class Program
 {
@@ -25,7 +24,7 @@ class Program
 
             if (!(IsNumber(consoleInput, out int result) && IsInRange(result))) { Console.WriteLine("Invalid Input"); CreateMenuDistance(); continue; }
 
-            ShowMenu(Convert.ToInt16(consoleInput), removeLastMenu: true);
+            ShowMenu(result, removeLastMenu: true);
 
             OPTIONS[result].Item2.RunSynchronously();
 
