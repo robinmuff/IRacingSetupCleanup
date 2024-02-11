@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/X.csproj",
+                "${workspaceFolder}/IRacingSetupCleanup.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary;ForceNoAlign"
             ],
@@ -19,7 +19,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/X.csproj",
+                "${workspaceFolder}/IRacingSetupCleanup.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary;ForceNoAlign"
             ],
@@ -33,7 +33,7 @@
                 "watch",
                 "run",
                 "--project",
-                "${workspaceFolder}/X.csproj"
+                "${workspaceFolder}/IRacingSetupCleanup.csproj"
             ],
             "problemMatcher": "$msCompile"
         }
