@@ -3,12 +3,13 @@ using IRacingSetupCleanup;
 
 class Program
 {
+    const int LINES_BETWEEN_MENU = 3;
     const ConsoleColor SELECTED_COLOR = ConsoleColor.Green;
-    static readonly List<string> OPTIONS =
+    static readonly List<Tuple<string, Task>> OPTIONS =
     [
-        "List setups",
-        "Delete old setups",
-        "Delete empty subfolders"
+        new Tuple<string, Task>("List setups", new Task(ListSetups)),
+        new Tuple<string, Task>("Delete old setups", new Task(DeleteSetups)),
+        new Tuple<string, Task>("Delete empty subfolders", new Task(DeleteEmptySubfolders))
     ];
     static readonly string folderPath = @$"C:\Users\{Environment.UserName}\Documents\iRacing\setups\";
 
@@ -22,24 +23,11 @@ class Program
 
             consoleInput = Console.ReadLine() ?? "";
 
-            if (!IsInputValid(consoleInput)) { Console.WriteLine("Invalid Input"); CreateMenuDistance(); continue; }
+            if (!(IsNumber(consoleInput, out int result) && IsInRange(result))) { Console.WriteLine("Invalid Input"); CreateMenuDistance(); continue; }
 
-            RemoveLastMenu();
+            ShowMenu(Convert.ToInt16(consoleInput), removeLastMenu: true);
 
-            ShowMenu(Convert.ToInt16(consoleInput));
-
-            switch (consoleInput)
-            {
-                case "0":
-                    ListSetups();
-                    break;
-                case "1":
-                    DeleteSetups();
-                    break;
-                case "2":
-                    DeleteEmptySubfolders();
-                    break;
-            }
+            OPTIONS[result].Item2.RunSynchronously();
 
             CreateMenuDistance();
         }
@@ -60,7 +48,7 @@ class Program
     }
     static void DeleteSetups()
     {
-        Console.Write("Enter the current season (e.g., 24S1): ");
+        Console.Write("Enter setup identifier to delete (e.g., '24S1'). Warning: Matching setups will be removed.");
         string input = Console.ReadLine() ?? "";
 
         List<string> filesToDelete = Directory
@@ -76,7 +64,7 @@ class Program
             Console.WriteLine(file);
         }
 
-        Console.Write("CONFIRM WITH \"y\": ");
+        Console.Write("CONFIRM WITH 'y': ");
         input = Console.ReadLine() ?? "";
 
         if (input.Equals("y", StringComparison.CurrentCultureIgnoreCase))
@@ -121,7 +109,7 @@ class Program
             Console.WriteLine("--- FOLDERS TO BE DELETED ---");
             foreach (string folder in subfoldersToDelete) Console.WriteLine(folder);
 
-            Console.Write("CONFIRM WITH \"y\": ");
+            Console.Write("CONFIRM WITH 'y': ");
             string confirmInput = Console.ReadLine() ?? "";
 
             if (confirmInput.Equals("y", StringComparison.CurrentCultureIgnoreCase))
@@ -145,10 +133,11 @@ class Program
 
     // -> Helper
     // Menu
-    static bool IsInputValid(string input)
+    static bool IsNumber(string input, out int result)
     {
-        return int.TryParse(input, out int result) && (result >=0 || result < OPTIONS.Count);
+        return int.TryParse(input, out result);
     }
+    static bool IsInRange(int input) => input >= 0 && input < OPTIONS.Count;
     static void RemoveLastMenu()
     {
         // Remove the menu + (header + footer + current = 3)
@@ -158,22 +147,25 @@ class Program
             ClearCurrentConsoleLine(); // Clear the line
         }
     }
-    static void ShowMenu(int selected = -1)
+    static void ShowMenu(int selected = -1, bool removeLastMenu = false)
     {
-        int longestOption = OPTIONS.Max(item => item.Length);
+        if (removeLastMenu) RemoveLastMenu();
+
+        int longestOption = OPTIONS.Max(item => item.Item1.Length);
 
         // Longest text + distance for left and right design (8)
         string menuOutline = new('-', longestOption + 8);
 
         Console.WriteLine(menuOutline);
-        foreach (string option in OPTIONS)
+        foreach (string option in OPTIONS.Select(item => item.Item1))
         {
-            bool isSelected = OPTIONS.IndexOf(option) == selected;
+            int currentIndex = OPTIONS.Select(item => item.Item1).ToList().IndexOf(option);
+            bool isSelected = currentIndex == selected;
 
             Console.Write("| ");
 
             if (isSelected) Console.ForegroundColor = SELECTED_COLOR;
-            Console.Write($"({OPTIONS.IndexOf(option)}) {option.PadRight(longestOption)}");
+            Console.Write($"({currentIndex}) {option.PadRight(longestOption)}");
             if (isSelected) Console.ForegroundColor = ConsoleColor.White;
 
             Console.WriteLine(" |");
@@ -189,6 +181,6 @@ class Program
     }
     static void CreateMenuDistance() 
     {
-        Console.WriteLine(); Console.WriteLine(); Console.WriteLine();
+        for (int i = 0; i < LINES_BETWEEN_MENU; i++) Console.WriteLine();
     }
 }
